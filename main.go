@@ -19,15 +19,21 @@ type Mapper struct {
 func Favhandler(w http.ResponseWriter, r *http.Request) {
 }
 
+func about(w http.ResponseWriter, r *http.Request) {
+	log.Println("In about")
+	log.Println("PORT: ", os.Getenv("PORT"))
+	log.Println("MONGO_URL: ", os.Getenv("MONGO_URL"))
+	fmt.Fprintln(w, "About Page: This app is a example go app deployed in docker that connects to mongodb.")
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("In handler")
-	fmt.Fprintln(w, "helloworld")
 	uri := os.Getenv("MONGO_URL")
 	if uri == "" {
 		fmt.Println("no connection string provided")
 		os.Exit(1)
 	}
-
+	log.Println("Connecting to mongo: ", uri)
 	sess, err := mgo.Dial(uri)
 
 	if err != nil {
@@ -64,8 +70,11 @@ func main() {
 		os.Exit(1)
 	}
 	port = ":" + port
+	log.Println("Port: ", port)
 
 	http.HandleFunc("/favicon.ico", Favhandler)
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/hits", handler)
+	http.HandleFunc("/about", about)
+	http.HandleFunc("/", about)
 	http.ListenAndServe(port, nil)
 }
